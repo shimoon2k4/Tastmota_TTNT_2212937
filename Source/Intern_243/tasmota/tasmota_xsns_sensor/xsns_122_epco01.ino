@@ -1,5 +1,5 @@
 #ifdef USE_RS485
-#ifdef USE_XSNS_EPCO01
+#ifdef USE_EPCO01
 
 #define XSNS_122 122
 #define XRS485_40 40
