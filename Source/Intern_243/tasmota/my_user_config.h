@@ -635,6 +635,7 @@
 #ifdef USE_RS485
 #define USE_EPSO2
 #define USE_EPO301
+#define USE_EPNO201
 #define USE_EPCO01
 
 
