@@ -751,6 +751,7 @@
 #define USE_PZEM_DC                              // Add support for PZEM003,017 Energy monitor (+1k1 code)
 #define USE_MCP39F501                            // Add support for MCP39F501 Energy monitor as used in Shelly 2 (+3k1 code)
 #define USE_SDM72                                // Add support for Eastron SDM72-Modbus energy monitor (+0k3 code)
+#define USE_RS485                                // Add support for RS485 serial interface (+1k code)
 #define USE_SDM120                               // Add support for Eastron SDM120-Modbus energy monitor (+1k1 code)
 #define USE_SDM230                               // Add support for Eastron SDM230-Modbus energy monitor (+?? code)
 #define USE_SDM630                               // Add support for Eastron SDM630-Modbus energy monitor (+0k6 code)

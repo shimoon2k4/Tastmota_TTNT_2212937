@@ -1,7 +1,7 @@
 #ifdef USE_RS485
 #ifdef USE_EP0301
 
-#define XSNS_124 124  // ID module tùy chỉnh
+#define XSNS_120 120  // ID module tùy chỉnh
 #define XRS485_30 30
 
 struct O3Sensor_t

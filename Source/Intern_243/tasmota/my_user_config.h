@@ -637,6 +637,7 @@
 #define USE_EPO301
 #define USE_EPNO201
 #define USE_EPCO01
+#define USE_SOIL7IN1
 
 
 
