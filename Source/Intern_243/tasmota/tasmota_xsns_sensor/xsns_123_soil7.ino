@@ -2,9 +2,9 @@
 #ifdef USE_SOIL7IN1
 
 #define XSNS_123 123
-#define XRS485_35 35
+#define XRS485_11 11
 
-struct SOIL7IN1t
+struct SOIL7IN1_t
 {
     bool valid = false;
     float ph = 0.0;
@@ -12,30 +12,29 @@ struct SOIL7IN1t
     float temperature = 0.0;
     float conductivity = 0.0;
     float nitrogen = 0.0;
-    float phosphorus = 0.0; 
+    float phosphorus = 0.0;
     float potassium = 0.0;
     char name[19] = "7 in 1 Soil Sensor";
 } SOIL7IN1;
 
-#define SOIL7IN1_ADDRESS_ID 0x11
-#define SOIL7IN1_ADDRESS_CHECK  0x0100
-#define SOIL7IN1_ADDRESS_PH 0x0006
-#define SOIL7IN1_ADDRESS_MOISTURE 0x0012
+#define SOIL7IN1_ADDRESS_ID         0x11
+#define SOIL7IN1_ADDRESS_CHECK      0x0100
+#define SOIL7IN1_ADDRESS_PH         0x0006
+#define SOIL7IN1_ADDRESS_MOISTURE   0x0012
 #define SOIL7IN1_ADDRESS_TEMPERATURE 0x0013
 #define SOIL7IN1_ADDRESS_CONDUCTIVITY 0x0015
-#define SOIL7IN1_ADDRESS_NITROGEN 0x001E
+#define SOIL7IN1_ADDRESS_NITROGEN   0x001E
 #define SOIL7IN1_ADDRESS_PHOSPHORUS 0x001F
-#define SOIL7IN1_ADDRESS_POTASSIUM 0x0020
-#define SOIL7IN1_FUNCTION_CODE 0x03
-#define SOIL7IN1_TIMEOUT 150
+#define SOIL7IN1_ADDRESS_POTASSIUM  0x0020
+#define SOIL7IN1_FUNCTION_CODE      0x03
+#define SOIL7IN1_TIMEOUT            150
 
 bool SOIL7IN1isConnected()
 {
-    if(!RS485.active) return false;
+    if (!RS485.active) return false;
 
     RS485.Rs485Modbus->Send(SOIL7IN1_ADDRESS_ID, SOIL7IN1_FUNCTION_CODE, SOIL7IN1_ADDRESS_CHECK, 0x01);
-
-    delay(200);
+    delay(1000);
 
     RS485.Rs485Modbus->ReceiveReady();
 
@@ -48,19 +47,18 @@ bool SOIL7IN1isConnected()
         return false;
     }
     else
-    {   
+    {
         uint16_t check_SOIL7IN1 = (buffer[3] << 8) | buffer[4];
-        if(check_SOIL7IN1 == SOIL7IN1_ADDRESS_ID) return true;
+        if (check_SOIL7IN1 == SOIL7IN1_ADDRESS_ID) return true;
     }
     return false;
 }
 
 void SOIL7IN1Init(void)
 {
-    if(!RS485.active) return;
+    if (!RS485.active) return;
     SOIL7IN1.valid = SOIL7IN1isConnected();
-    //if(!SOIL7IN1.valid) TasmotaGlobal.restart_flag = 2;
-    if(SOIL7IN1.valid) Rs485SetActiveFound(SOIL7IN1_ADDRESS_ID, SOIL7IN1.name);
+    if (SOIL7IN1.valid) Rs485SetActiveFound(SOIL7IN1_ADDRESS_ID, SOIL7IN1.name);
     AddLog(LOG_LEVEL_INFO, SOIL7IN1.valid ? PSTR("SOIL7IN1 is connected") : PSTR("SOIL7IN1 is not detected"));
 }
 
@@ -69,14 +67,13 @@ void SOIL7IN1ReadData(void)
     if (!SOIL7IN1.valid) return;
     if (isWaitingResponse(SOIL7IN1_ADDRESS_ID)) return;
 
-    // Queue các request cần đọc
     static const struct
     {
         uint16_t regAddr;
         uint8_t regCount;
-        void (*assign)(float); // Hàm gán giá trị
+        void (*assign)(float);
     } SOIL7IN1Queue[] = {
-        {SOIL7IN1_ADDRESS_PH, 1, [](float v){ SOIL7IN1.ph = v / 10.0f; }},
+        {SOIL7IN1_ADDRESS_PH, 1, [](float v){ SOIL7IN1.ph = v / 100.0f; }},
         {SOIL7IN1_ADDRESS_MOISTURE, 1, [](float v){ SOIL7IN1.moisture = v / 10.0f; }},
         {SOIL7IN1_ADDRESS_TEMPERATURE, 1, [](float v){ SOIL7IN1.temperature = v / 10.0f; }},
         {SOIL7IN1_ADDRESS_CONDUCTIVITY, 1, [](float v){ SOIL7IN1.conductivity = v; }},
@@ -89,7 +86,6 @@ void SOIL7IN1ReadData(void)
     static uint32_t lastRequestTime = 0;
 
     if (!waitingResponse) {
-        // Gửi request mới
         RS485.Rs485Modbus->Send(
             SOIL7IN1_ADDRESS_ID,
             SOIL7IN1_FUNCTION_CODE,
@@ -99,7 +95,6 @@ void SOIL7IN1ReadData(void)
         waitingResponse = true;
         lastRequestTime = millis();
     } else if (millis() - lastRequestTime >= 200) {
-        // Đợi đủ thời gian, kiểm tra phản hồi
         if (RS485.Rs485Modbus->ReceiveReady()) {
             uint8_t buffer[8];
             uint8_t error = RS485.Rs485Modbus->ReceiveBuffer(buffer, sizeof(buffer));
@@ -109,7 +104,6 @@ void SOIL7IN1ReadData(void)
                 float value = (float)((buffer[3] << 8) | buffer[4]);
                 SOIL7IN1Queue[queueIndex].assign(value);
             }
-            // Chuyển sang request tiếp theo trong queue
             queueIndex = (queueIndex + 1) % (sizeof(SOIL7IN1Queue) / sizeof(SOIL7IN1Queue[0]));
             waitingResponse = false;
         }
@@ -134,7 +128,7 @@ const char HTTP_SNS_SOIL7IN1_POTASSIUM[] PROGMEM = "{s} SOIL7IN1 POTASSIUM {m} %
 
 void SOIL7IN1Show(bool json)
 {
-    if(json)
+    if (json)
     {
         ResponseAppend_P(PSTR(",\"%s\":{"), SOIL7IN1.name);
         ResponseAppend_P(PSTR("\"" D_JSON_SOIL7IN1_PH "\":%.2f,"), SOIL7IN1.ph);
@@ -162,14 +156,14 @@ void SOIL7IN1Show(bool json)
 
 bool Xsns123(uint32_t function)
 {
-    if(!Rs485Enabled(XRS485_35)) return false;
+    if (!Rs485Enabled(XRS485_11)) return false;
 
     bool result = false;
-    if(FUNC_INIT == function)
+    if (FUNC_INIT == function)
     {
         SOIL7IN1Init();
     }
-    else if(SOIL7IN1.valid)
+    else if (SOIL7IN1.valid)
     {
         switch (function)
         {

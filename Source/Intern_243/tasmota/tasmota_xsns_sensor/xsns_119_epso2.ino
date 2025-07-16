@@ -2,16 +2,16 @@
 #ifdef USE_EPSO2
 
 #define XSNS_119 119
-#define XRS485_36 36
+#define XRS485_21 21
 
 struct EPSO2_t
 {
     bool valid = false;
     float so2 = 0.0;
-    char name[12] = "EP SO2";
+    char name[7] = "EP SO2";
 } EP_SO2;
 
-#define EP_SO2_ADDRESS_ID      0x21
+#define EP_SO2_ADDRESS_ID      0x01
 #define EP_SO2_ADDRESS_CHECK   0x0100
 #define EP_SO2_ADDRESS_SO2     0x0006
 #define EP_SO2_FUNCTION_CODE   0x03
@@ -21,9 +21,9 @@ bool EP_SO2isConnected()
 {
     if (!RS485.active) return false;
 
-    RS485.Rs485Modbus->Send(EP_SO2_ADDRESS_ID, EP_SO2_FUNCTION_CODE, EP_SO2_ADDRESS_CHECK, 0x01);
+    RS485.Rs485Modbus -> Send(EP_SO2_ADDRESS_ID, EP_SO2_FUNCTION_CODE, (0x01 << 8) | 0x00, 0x01);
     AddLog(LOG_LEVEL_INFO, PSTR("Sending Modbus to EP_SO2..."));
-    delay(500);
+    delay(1000);
     AddLog(LOG_LEVEL_INFO, PSTR("Reading response from EP_SO2..."));
 
     RS485.Rs485Modbus->ReceiveReady();
@@ -116,7 +116,7 @@ void EP_SO2Show(bool json)
 
 bool Xsns119(uint32_t function)
 {
-    if (!Rs485Enabled(XRS485_36)) return false;
+    if (!Rs485Enabled(XRS485_21)) return false;
 
     bool result = false;
     if (FUNC_INIT == function)
